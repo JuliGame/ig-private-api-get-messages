@@ -9,7 +9,7 @@ import {
 import {Cookie, CookieJar, MemoryCookieStore} from 'tough-cookie';
 
 import {
-    AccountRepositoryLoginResponseRootObject,
+    AccountRepositoryLoginResponseRootObject, DirectThreadFeedResponse,
     IgApiClient,
     IgLoginTwoFactorRequiredError,
     IgResponseError
@@ -34,7 +34,7 @@ const { IG_USERNAME = '', IG_PASSWORD = '' } = process.env;
     // this will set the auth and the cookies for instagram
     // await readState(ig);
 
-    const cookies: { [key: string]: string } = {"mid":"ZiwrawALAAFVPgeKIEi6OsVX_1Cc","csrftoken":"eKQBiipCky0Gayh7a3jR2t2mWxFI5baD","ds_user_id":"5436538838","wd":"648x991"}
+    // const cookies: { [key: string]: string } = {"mid":"ZiwrawALAAFVPgeKIEi6OsVX_1Cc","csrftoken":"eKQBiipCky0Gayh7a3jR2t2mWxFI5baD","ds_user_id":"5436538838","wd":"648x991"}
     // for (const key in cookies) {
     //     const value: string = cookies[key] as string;
     //
@@ -75,15 +75,29 @@ const { IG_USERNAME = '', IG_PASSWORD = '' } = process.env;
 
 
 
-    const [thread] = await ig.feed.directInbox().records();
-    console.log(thread);
-
+    // const [thread] = await ig.feed.directInbox().records();
+    // console.log(thread);
+    //
     // directThread(options: Pick<DirectInboxFeedResponseThreadsItem, 'thread_id' | 'oldest_cursor'>, seqId?: number): DirectThreadFeed;
-    const directThread = ig.feed.directThread({thread_id: thread.threadId, oldest_cursor: ""});
-    directThread.items().then((items) => {
-        console.log("items", items);
+    // const directThread = ig.feed.directThread({thread_id: thread.threadId, oldest_cursor: ""});
+    // directThread.items().then((items) => {
+    //     console.log("items", items);
+    // });
+    // console.log("thread", directThread);
+
+    const { body } = await ig.request.send<DirectThreadFeedResponse>({
+      url: `/api/v1/direct_v2/threads/340282366841710301244259381505871168428/`,
+      qs: {
+        visual_message_return_type: 'unseen',
+        cursor: 0,
+        direction: 'older',
+        seq_id: 0,
+        limit: 10,
+      },
     });
-    console.log("thread", directThread);
+    // console.log("headers", body.headers);
+    console.log("body", body);
+    // console.log("items", body.thread.items);
 
     // you received a notification
     ig.fbns.on('push', logEvent('push'));
