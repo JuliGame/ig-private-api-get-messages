@@ -34,38 +34,53 @@ const { IG_USERNAME = '', IG_PASSWORD = '' } = process.env;
     // this will set the auth and the cookies for instagram
     // await readState(ig);
 
-    // const cookies: { [key: string]: string } = {"mid":"ZiwrawALAAFVPgeKIEi6OsVX_1Cc","csrftoken":"eKQBiipCky0Gayh7a3jR2t2mWxFI5baD","ds_user_id":"5436538838","wd":"648x991"}
-    // for (const key in cookies) {
-    //     const value: string = cookies[key] as string;
-    //
-    //     const cookie = new Cookie({
-    //         key: key,
-    //         value: value,
-    //         domain: 'instagram.com', // Set domain if applicable
-    //         path: '/', // Set path if applicable
-    //         httpOnly: true, // Whether the cookie is HTTP only
-    //         secure: true // Whether the cookie is secure (HTTPS only)
-    //     });
-    //
-    //     ig.state.cookieStore.putCookie(cookie, (err) => {
-    //         if (err) {
-    //             console.error('Error adding cookie:', err);
-    //         } else {
-    //            console.log('Cookie added successfully');
-    //         }
-    //     });
-    //
-    //     // const cookieoptions : SetCookieOptions = {
-    //     //     http: true,
-    //     //     secure: true,
-    //     //     now: new Date(),
-    //     //     ignoreError: true
-    //     // }
-    //
-    //     ig.state.cookieJar.setCookie(cookie, 'https://instagram.com');
-    // }
+    const cookies: { [key: string]: string } = {"mid":"ZiwrawALAAFVPgeKIEi6OsVX_1Cc","csrftoken":"eKQBiipCky0Gayh7a3jR2t2mWxFI5baD","ds_user_id":"5436538838","wd":"648x991", "sessionid":"5436538838%3AvEbkiySYRoV9dO%3A27%3AAYfPcoWeXZ_qYZdaiqfmARoHaCOrRKi7HcnYhg19zw"};
+    for (const key in cookies) {
+        const value: string = cookies[key] as string;
 
-    ig.state.authorization = "Bearer IGT:2:eyJkc191c2VyX2lkIjoiNTQzNjUzODgzOCIsInNlc3Npb25pZCI6IjU0MzY1Mzg4MzglM0FzbHQ2cGxZMWJQOWZ2QyUzQTI0JTNBQVlkcVJGNG9pcmliZHJUNkh1ckdwZXJZM19aR0NMU1gwRTNMS0ttZHpRIn0="
+        const cookie = new Cookie({
+            key: key,
+            value: value,
+            domain: 'instagram.com', // Set domain if applicable
+            path: '/', // Set path if applicable
+            httpOnly: true, // Whether the cookie is HTTP only
+            secure: true // Whether the cookie is secure (HTTPS only)
+        });
+
+        ig.state.cookieStore.putCookie(cookie, (err) => {
+            if (err) {
+                console.error('Error adding cookie:', err);
+            } else {
+               console.log('Cookie added successfully');
+            }
+        });
+
+        // const cookieoptions : SetCookieOptions = {
+        //     http: true,
+        //     secure: true,
+        //     now: new Date(),
+        //     ignoreError: true
+        // }
+
+        ig.state.cookieJar.setCookie(cookie, 'https://instagram.com');
+    }
+
+    const cookie_string = await ig.state.cookieJar.getCookieString('https://instagram.com');
+    const ds_user_id = cookie_string.match(/ds_user_id=([^;]*)/);
+    const sessionid = cookie_string.match(/sessionid=([^;]*)/);
+
+    const ds_user_id_value = ds_user_id ? ds_user_id[1] : "";
+    const sessionid_value = sessionid ? sessionid[1] : "";
+
+
+    const to_encode = "{\"ds_user_id\":\""+ds_user_id_value+"\",\"sessionid\":\""+sessionid_value+"\"}";
+    console.log("to_encode", to_encode);
+    const encoded = Buffer.from(to_encode).toString('base64');
+    console.log("encoded", encoded);
+    // return
+
+    // ig.state.authorization = "Bearer IGT:2:eyJkc191c2VyX2lkIjoiNTQzNjUzODgzOCIsInNlc3Npb25pZCI6IjU0MzY1Mzg4MzglM0FzbHQ2cGxZMWJQOWZ2QyUzQTI0JTNBQVlkcVJGNG9pcmliZHJUNkh1ckdwZXJZM19aR0NMU1gwRTNMS0ttZHpRIn0="
+    ig.state.authorization = "Bearer IGT:2:"+encoded;
 
     console.log("headers", ig.request.getDefaultHeaders())
 
